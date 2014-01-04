@@ -15,6 +15,7 @@ module SpreeInkomerce
       Spree::AppConfiguration.class_eval do
         preference :inkomerce_store_uid,          :string
         preference :inkomerce_store_token,        :string
+        preference :inkomerce_site_type,           :string, :default => 'test'
         preference :can_default_maximum_discount, :integer
         preference :inkit_button_logo_url,        :string
       end

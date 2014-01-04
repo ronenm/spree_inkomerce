@@ -16,7 +16,7 @@ Gem::Specification.new do |s|
   s.require_path = 'lib'
   s.requirements << 'none'
 
-  s.add_dependency 'inkomerce-api'
+  s.add_dependency 'inkomerce_api'
 
   s.add_dependency 'durable_decorator', '~> 0.2.0'
   s.add_dependency 'spree_api',         '~> 2.1.0'
