@@ -1,30 +1,43 @@
 require "InKomerce_API_v1"
 
 module Spree
-  class InkoerceStore
+  class InkomerceStore
     include ActiveModel::Model
     
     attr_accessor :name, :default_category_id, :store_url, :success_uri, :cancel_uri, :currency,
-                  :language, :default_maximum_discount, :button_logo_url, :api_client_id, :api_client_secret
+                  :locale, :default_maximum_discount, :button_logo_url, :api_client_id, :api_client_secret
     
-    SYNC_ATTRIBUTES = [:name, :store_url, :success_uri, :cancel_uri, :currency, :language]
+    SYNC_ATTRIBUTES = [:name, :store_url, :success_uri, :cancel_uri, :currency, :locale]
+
+    DEFAULT_ATTRIBUTES_SETTING = {
+      store_url: :site_url,
+      currency: :currency,
+      success_uri: 'ink/success',
+      cancel_uri: 'ink/cancel',
+      name: :site_name,
+      button_logo_url: "https://s3.amazonaws.com/inkomerce-assets/sellers-assets/ink_can_light_with_bg.png",
+      locale: 'en'
+    }
+
     
     attr_reader :default_category, :uid, :token
     
     cattr_accessor :store_connector  # No need to create more than one store connector
     cattr_accessor :global_connector  # No need to create more than one global connector
     
+    
+    
     def id
       uid
     end
     
     def persisted?
-      !uid.nil?
+      !(uid.nil? || uid=="")
     end
     
     def default_category
       unless store_connector.nil?
-        store_connector.store_rec[:default_category][:name]
+        store_connector.store_rec[:store][:default_category][:name]
       end
     end
     
@@ -53,18 +66,18 @@ module Spree
     end
     
     def self.create_store(client_id,client_secret,data)
-      self.store_connector = InKomerce_API_v1::Store.create(client_id,client_secret,Spree::Config.inkomerce_site_type.to_sym,data)
+      self.store_connector = InKomerceAPIV1::Store.create(client_id,client_secret,Spree::Config.inkomerce_site_type.to_sym,data)
       Spree::Config.inkomerce_store_uid = self.store_connector.uid
       Spree::Config.inkomerce_store_token = self.store_connector.token
     end
     
     def self.connect
-      self.store_connector = InKomerceAPIV1::Store.connect(Spree::Config.inkomerce_store_uid,
+      self.store_connector = connector = InKomerceAPIV1::Store.connect(Spree::Config.inkomerce_store_uid,
                                                            Spree::Config.inkomerce_store_token,
                                                            Spree::Config.inkomerce_site_type.to_sym)
       raise "Unable to connect to InKomerce API" if connector.nil?
       raise "InKomerce API connection error - #{connector.store_rec[:error]}" if connector.store_rec[:error]
-      raise "InKomerce API internal error!!!" connector.store_rec[:store].nil?
+      raise "InKomerce API internal error!!!" if connector.store_rec[:store].nil?
       self.store_connector
     end
     
@@ -84,14 +97,25 @@ module Spree
     end
     
     def initialize(attributes={})
-      sync if persisted?
       super
+      sync if persisted?
+      DEFAULT_ATTRIBUTES_SETTING.each do |key,val|
+        unless send(key)
+          send("#{key}=",val.is_a?(Symbol) ? Spree::Config.get_preference(val) : val)
+        end
+      end
+      if s_url = self.store_url
+        s_url.insert(0,"http://") unless s_url =~ /^https?:\/\//
+        s_url.insert(-1,"/") unless s_url[-1] == '/'
+        self.store_url = s_url
+      end
     end
+    
     
     def sync
       store = self.class.get_store
-      SYNC_ATTRIBUTES.each { |attr| attributes[attr] = store[attr] unless attributes[attr] }
-      attributes[:default_category_id] = store[:default_category][:id] unless attributes[:default_category_id]
+      SYNC_ATTRIBUTES.each { |attr| send("#{attr}=",store[attr]) unless send(attr) }
+      self.default_category_id = store[:default_category][:id] unless self.default_category_id
     end
     
     def load
@@ -125,6 +149,7 @@ module Spree
         else
           data = {}
           SYNC_ATTRIBUTES.each { |attr| data[attr] = send(attr) }
+          data[:default_category_id] = self.default_category_id
           self.class.create_store(api_client_id, api_client_secret, data)
           sync
         end
@@ -139,7 +164,7 @@ module Spree
     # Some global searches...
     def self.global
       if global_connector.nil?
-        self.global_connector = InKomerceAPIV1::global.new(Spree::Config.inkomerce_site_type.to_sym)
+        self.global_connector = InKomerceAPIV1::Global.new(Spree::Config.inkomerce_site_type.to_sym)
       end
       self.global_connector
     end
@@ -164,6 +189,21 @@ module Spree
         global.get_currencies(params)
       end
     end
+    
+    # Now for the setup
+    def set_taxon(taxon)
+      self.class.store_connector.create_taxonomy(taxon.id,name: taxon.name, parent_rid: taxon.parent_id)
+    end
+    
+    def remote_taxon(taxon)
+      # This is not supported by API, just ignore
+    end
+    
+    # Create/Update a product (and its variants) or a single variant
+    # At this stage every variant is a seperate product in InKomerce
+    # TODO: Support products for which all variants are of the same price
+    def 
+    
     
   end
 end
