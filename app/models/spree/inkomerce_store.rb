@@ -195,14 +195,55 @@ module Spree
       self.class.store_connector.create_taxonomy(taxon.id,name: taxon.name, parent_rid: taxon.parent_id)
     end
     
-    def remote_taxon(taxon)
+    def remove_taxon(taxon)
       # This is not supported by API, just ignore
     end
     
     # Create/Update a product (and its variants) or a single variant
     # At this stage every variant is a seperate product in InKomerce
     # TODO: Support products for which all variants are of the same price
-    def 
+    #   allow_override: false - if product exists return error, true - if product exists update it with new information
+    def create_product(prod_or_var,allow_override=false)
+      if prod_or_var.is_a?(Spree::Product)
+        if prod_or_var.variants.empty?
+          return create_product(prod_or_var.master,allow_override)
+        else
+          res = true
+          prod_or_var.variants.each {|v| res &&= create_product(v,allow_override) }
+          return res
+        end
+      end
+      # Now we are in variants space
+      title = prod_or_var.name
+      title.insert(-1," (#{prod_or_var.options_text})") if prod_or_var.option_values.exists?
+      price = prod_or_var.price_in(self.currency)
+      return false if price.nil?
+      offer = price.amount
+      min_price = prod_or_var.try(:minimum_price_in,self.currency)
+      min_price = min_price && min_price.amount || offer*(1.0-self.default_maximum_discount.to_i/100.0)
+      ink_prod_rec = {
+        rid: prod_or_var.id.to_s,
+        title: title,
+        description: prod_or_var.description,
+        offer: offer.to_s,
+        minimum_price: min_price.to_s,
+        taxonomies_rids: prod_or_var.product.taxons.pluck(:id).join(", "),
+        sku: prod_or_var.sku,
+        images_urls: prod_or_var.images.map { |i| i.attachment.url(:original) },
+        allow_override: allow_override
+      }
+      puts "*** #{ink_prod_rec} ****\n"
+      ret_rec = self.class.store_connector.create_product(ink_prod_rec)
+      if ret_rec.key?(:store_product)
+        prod_or_var.try(:ink_button_uid=,ret_rec[:store_product][:button_uid])
+        prod_or_var.try(:ink_button_url=,ret_rec[:store_product][:button_url])
+        prod_or_var.try(:ink_button_published=,true)
+        return true
+      else
+        self.errors.add(:general,ret_rec.is_a?(Hash) && ret_rec[:error] || "Unable to publish product to InKomerce")
+        return false
+      end
+    end
     
     
   end
