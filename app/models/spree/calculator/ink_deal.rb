@@ -8,9 +8,10 @@ module Spree
         Spree.t(:ink_deal_calculator)
       end
 
-      def compute(line_item, ink_deal)
-        # Ensure that there is no negative amount
-        return [ink_deal.discount * line_item.quantity. line_item.amount].min * -1
+      def compute(order, ink_deal)
+        quantity = order.line_items.where(variant_id: ink_deal.ink_button.variant_id).sum(:quantity)
+        tot_disc = ink_deal.discount * quantity
+        tot_disc > order.item_total ? -order.item_total : -tot_disc
       end
 
     end

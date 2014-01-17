@@ -1,0 +1,7 @@
+<!-- insert_bottom "[data-hook='products_list_item'] .price"
+     enabled
+     -->
+     
+<% if product.ink_negotiable? %>
+  <%= image_tag(Spree::Config.inkit_button_logo_url,class: "inkit_logo", title: Spree.t(:inkit_negotiable)) %>
+<% end %>

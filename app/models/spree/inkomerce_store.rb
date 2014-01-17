@@ -25,7 +25,14 @@ module Spree
     cattr_accessor :store_connector  # No need to create more than one store connector
     cattr_accessor :global_connector  # No need to create more than one global connector
     
+    # These are just a "convenience" methods
+    def store_connector
+      self.class.store_connector
+    end
     
+    def global_connector
+      self.class.global_connector
+    end
     
     def id
       uid
@@ -96,10 +103,14 @@ module Spree
       store_connector and store_connector.load or connect
     end
     
+    def get_default_attribute_setting
+      DEFAULT_ATTRIBUTES_SETTING
+    end
+    
     def initialize(attributes={})
       super
       sync if persisted?
-      DEFAULT_ATTRIBUTES_SETTING.each do |key,val|
+      get_default_attribute_setting.each do |key,val|
         unless send(key)
           send("#{key}=",val.is_a?(Symbol) ? Spree::Config.get_preference(val) : val)
         end
@@ -201,7 +212,6 @@ module Spree
     
     # Create/Update a product (and its variants) or a single variant
     # At this stage every variant is a seperate product in InKomerce
-    # TODO: Support products for which all variants are of the same price
     #   allow_override: false - if product exists return error, true - if product exists update it with new information
     def create_product(prod_or_var,allow_override=false)
       if prod_or_var.is_a?(Spree::Product)
@@ -214,16 +224,14 @@ module Spree
         end
       end
       # Now we are in variants space
-      title = prod_or_var.name
-      title.insert(-1," (#{prod_or_var.options_text})") if prod_or_var.option_values.exists?
       price = prod_or_var.price_in(self.currency)
       return false if price.nil?
       offer = price.amount
-      min_price = prod_or_var.try(:minimum_price_in,self.currency)
-      min_price = min_price && min_price.amount || offer*(1.0-self.default_maximum_discount.to_i/100.0)
+      min_price = prod_or_var.try(:minimum_price_in,self.currency) || offer*(1.0-self.default_maximum_discount.to_i/100.0)
+      
       ink_prod_rec = {
         rid: prod_or_var.id.to_s,
-        title: title,
+        title: prod_or_var.ink_name,
         description: prod_or_var.description,
         offer: offer.to_s,
         minimum_price: min_price.to_s,
@@ -245,6 +253,36 @@ module Spree
       end
     end
     
+    def populate_deal_data(deal_model)
+      buid = deal_model.buid
+      nuid = deal_model.nuid
+      
+      ink_can_rec = store_connector.get_store_button_can(buid,nuid)
+      
+      raise "ERROR: #{ink_can_rec[:error]}" if ink_can_rec[:error]
+      raise "ERROR: Unknown fatal error during request of negotiation record" unless ink_can_rec[:negotiation]
+      can_state = ink_can_rec[:negotiation][:state]
+      raise "ERROR: Negotiation is in unacceptable state: #{can_state}!" unless can_state=='checked_out'
+      discount = ink_can_rec[:negotiation][:final] && ink_can_rec[:negotiation][:final][:saving]
+      discount.gsub!(/[^ .0-9]+/,'') if discount.is_a?(String)  # Remove currency marks...
+      raise "ERROR: Missing discount value!" if discount.nil? || discount.is_a?(String) && discount==''
+      deal_model.try(:discount=,discount)
+      deal_model.try(:active=,true)
+      deal_model.try(:state=,can_state)  # At this stage we do not store state, but we may use for future implementations
+    end
     
+    def close_deal(deal_model)
+      buid = deal_model.buid
+      nuid = deal_model.nuid
+      
+      ink_can_rec = store_connector.close_store_button_can(buid,nuid)
+      raise "ERROR: #{ink_can_rec[:error]}" if ink_can_rec[:error]
+      raise "ERROR: Unknown fatal error during request of negotiation record" unless ink_can_rec[:negotiation]
+      can_state = ink_can_rec[:negotiation][:state]
+      deal_model.try(:state=,can_state) # At this stage we do not store state, but we may use for future implementations
+      closed = (can_state=='closed')
+      deal_model.try(:active=,false) if closed
+      return closed
+    end
   end
 end

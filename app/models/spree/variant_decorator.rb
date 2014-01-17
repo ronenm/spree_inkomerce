@@ -11,6 +11,10 @@ Spree::Variant.class_eval do
   
   validate :check_ink_button_values
   
+  def ink_name
+    option_values.exists? ? "#{name} (#{options_text})" : name
+  end
+  
   private
   
   def ensure_ink_button

@@ -1,3 +1,7 @@
 /*
  *= require store/spree_frontend
 */
+
+li[data-hook='products_list_item'] img.inkit_logo {
+    height: 15px;
+}

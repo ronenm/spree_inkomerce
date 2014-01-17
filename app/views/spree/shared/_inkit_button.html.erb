@@ -1,0 +1,26 @@
+<ul id="product-inkit-buttons" class="inkit-buttons inline"><%
+  if product.has_variants?
+    product.variants.each do |variant|
+      ink_button = variant.ink_button
+      if ink_button.published && ink_button.publish %>
+        <div>
+          <li class='vtmb tmb-<%= variant.id %>'>
+            <h6><%= Spree.t(:ink_negotiate_now) %></h6>
+            <%= link_to(image_tag(Spree::Config.inkit_button_logo_url,class: "inkit_logo", title: Spree.t(:inkit_negotiable)),ink_button.url) %>
+          </li>
+        </div><%
+      end
+    end
+  else
+    variant = product.master
+    ink_button = variant.ink_button
+    if ink_button.published && ink_button.publish %>
+      <li>
+        <div>
+          <h6><%= Spree.t(:ink_negotiate_now) %></h6>
+          <%= link_to(image_tag(Spree::Config.inkit_button_logo_url,class: "inkit_logo", title: Spree.t(:inkit_negotiable)),ink_button.url) %>
+        </div>
+      </li><%
+    end
+  end %>
+</ul>

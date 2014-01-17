@@ -1,0 +1,9 @@
+<!-- insert_after "[data-hook='product_price']"
+     enabled
+     -->
+     
+<% if @product.ink_negotiable? %>
+     <div id="inkit-button" data-hook="inkit_button" class="columns five omega">
+          <%= render :partial => 'spree/shared/inkit_button', :locals => { :product => @product } %>
+     </div>
+<% end %>
