@@ -37,8 +37,7 @@ Spree::Variant.class_eval do
       if is_master
         ink_button.publish = false
       else
-        if Spree::Config[:require_master_price] 
-          raise 'No master variant found to infer minimum price' unless (product && product.master)
+        if product && product.master
           master = product.master
           ink_button.maximum_discount = master.ink_button.maximum_discount if ink_button.maximum_discount.nil?
           ink_button.publish = master.ink_button.publish

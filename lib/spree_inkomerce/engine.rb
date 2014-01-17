@@ -15,9 +15,9 @@ module SpreeInkomerce
       Spree::AppConfiguration.class_eval do
         preference :inkomerce_store_uid,          :string
         preference :inkomerce_store_token,        :string
-        preference :inkomerce_site_type,           :string, :default => 'test'
+        preference :inkomerce_site_type,           :string, :default => 'production'
         preference :can_default_maximum_discount, :integer
-        preference :inkit_button_logo_url,        :string
+        preference :inkit_button_logo_url,        :string, :default => "https://s3.amazonaws.com/inkomerce-assets/sellers-assets/ink_can_light_with_bg.png"
       end
     end
 
