@@ -15,6 +15,10 @@ Spree::Variant.class_eval do
     option_values.exists? ? "#{name} (#{options_text})" : name
   end
   
+  def ink_button_allow_publish?
+    ink_button_publish && (product.nil? || product.master.nil? || product.ink_button_publish)
+  end
+  
   private
   
   def ensure_ink_button
@@ -22,12 +26,16 @@ Spree::Variant.class_eval do
   end
 
   def update_ink_button
-    if ink_button_publish && ink_button.updated_at < self.product.updated_at
-      store = Spree::InkomerceStore.new
-      if store
-        store.create_product(self, true)
-        ink_button.save
+    if ink_button_allow_publish?
+      if ink_button.updated_at < self.product.updated_at
+        store = Spree::InkomerceStore.new
+        if store
+          store.create_product(self, true)
+          ink_button.save
+        end
       end
+    else
+      self.ink_button_published = false
     end
   end
 
@@ -40,7 +48,7 @@ Spree::Variant.class_eval do
         if product && product.master
           master = product.master
           ink_button.maximum_discount = master.ink_button.maximum_discount if ink_button.maximum_discount.nil?
-          ink_button.publish = master.ink_button.publish
+          ink_button.publish = true
         end
       end
     end
