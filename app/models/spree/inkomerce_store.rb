@@ -90,7 +90,7 @@ module Spree
     
     def self.replace_token(client_id,client_secret)
       connector = store_connector || connect
-      connector.replace_token(client_id,client_id)
+      connector.replace_token(client_id,client_secret)
       Spree::Config.inkomerce_store_token = connector.token
     end
     
@@ -192,6 +192,10 @@ module Spree
       end
     end
     
+    def categories(params=nil)
+      self.class.categories(params)
+    end
+    
     def self.currencies(params = nil)
       if params.nil? 
         return currencies_hash if currencies_hash
@@ -199,6 +203,10 @@ module Spree
       else
         global.get_currencies(params)
       end
+    end
+    
+    def currencies(param=nil)
+      self.class.currencies(param)
     end
     
     # Now for the setup
@@ -240,6 +248,7 @@ module Spree
         images_urls: prod_or_var.images.map { |i| i.attachment.url(:original) },
         allow_override: allow_override
       }
+      ink_prod_rec.delete(:sku) if prod_or_var[:sku].nil? || prod_or_var[:sku] =~ /^\s*$/
       puts "*** #{ink_prod_rec} ****\n"
       ret_rec = self.class.store_connector.create_product(ink_prod_rec)
       if ret_rec.key?(:store_product)

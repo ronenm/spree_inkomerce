@@ -1,0 +1,88 @@
+<div data-hook="admin_inkomerce_store_form_fields">
+
+  <fieldset class="no-border-top">
+    <div class="row">
+      <div class="alpha twelve columns">
+        <% if store.persisted? %>
+            <%= f.field_container :uid do %>
+              <%= f.label :uid %>
+              <%= f.text_field :uid, class: "fullwidth", disabled: true %>
+              <%= f.error_message_on :uid %>
+            <% end %>
+        <% else %>
+            <%= f.field_container :api_client_id do %>
+              <%= f.label :api_client_id %><span class="required">*</span>
+              <%= f.text_field :api_client_id, class: "fullwidth" %>
+              <%= f.error_message_on :api_client_id %>
+            <% end %>
+            <%= f.field_container :api_client_secret do %>
+              <%= f.label :api_client_secret %><span class="required">*</span>
+              <%= f.text_field :api_client_secret, class: "fullwidth" %>
+              <%= f.error_message_on :api_client_secret %>
+            <% end %>
+        <% end %>
+        
+        <%= f.field_container :name do %>
+          <%= f.label :name %><span class="required">*</span>
+          <%= f.text_field :name, :class => "fullwidth" %>
+          <%= f.error_message_on :name %>
+        <% end %>
+      </div>
+    </div>
+        
+    <div class="row">
+      <div class="left five columns">
+        <fieldset class="inkomerce-store-settings no-border-bottom">
+          <legend align="center"><%= Spree.t(:inkomerce_store_settings)%></legend>
+          <%= f.field_container :default_category do %>
+            <%= f.label :default_category_id %><span class="required">*</span>
+            <%= f.select(:default_category_id, store.categories.map { |cat| [cat[:name], cat[:id]] },
+                          { :include_blank => false }, { :class => 'select2' }) %>
+            <%= f.error_message_on :default_category_id %>
+          <% end %>
+          
+          <%= f.field_container :default_maximum_discount do %>
+            <%= f.label :default_maximum_discount %><span class="required">*</span>
+            <%= f.number_field :default_maximum_discount, in: 5..70, step: 5 %>
+            <%= f.error_message_on :default_maximum_discount %>
+          <% end %>
+        
+        </fieldset>
+      </div>
+      
+      <div class="right six columns">
+        <fieldset class="inkomerce-store-settings no-border-bottom">
+          <legend align="center"><%= Spree.t(:inkomerce_inherited_settings)%></legend>
+          <b align="center"><%= raw(Spree.t(:donot_change_unless_necessary)) %></b><br/>
+          <%= f.field_container :locale do %>
+            <%= f.label :locale %>
+            <%= f.text_field :locale %>
+            <%= f.error_message_on :locale %>
+          <% end %>
+          <%= f.field_container :currency do %>
+            <%= f.label :currency %>
+            <%= f.select(:currency, store.currencies.map { |cur| ["#{cur[:country]}(#{cur[:symbol]})", cur[:code], ] },
+                         { :include_blank => false }, { :class => 'select2' }) %>
+            <%= f.error_message_on :currency %>
+          <% end %>
+        
+          <%= f.field_container :button_logo_url do %>
+            <%= f.label :button_logo_url %>
+            <%= f.text_field :button_logo_url, class: "fullwidth" %>
+            <%= f.error_message_on :button_logo_url %>
+          <% end %>
+
+          <%= f.field_container :store_url do %>
+            <%= f.label :store_url %>
+            <%= f.text_field :store_url, class: "fullwidth" %>
+            <%= f.error_message_on :store_url %>
+          <% end %>
+          
+        </fieldset>
+      </div>
+    
+    </div>
+  </fieldset>
+</div>
+  
+          

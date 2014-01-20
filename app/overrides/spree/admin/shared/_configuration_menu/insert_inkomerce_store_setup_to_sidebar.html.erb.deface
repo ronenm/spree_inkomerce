@@ -1,0 +1,5 @@
+<!-- insert_after "erb[loud]:contains('edit_admin_general_settings_path')"
+     enabled
+-->
+
+<%= configurations_sidebar_menu_item Spree.t(:inkomerce_store_settings), admin_inkomerce_store_path %>

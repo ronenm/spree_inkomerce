@@ -20,15 +20,14 @@ Spree::Product.class_eval do
   
   def ink_button_synchronize
     if ink_button_publish && ink_negotiable?!=:all
+      master.save
       if variants.any?
-        variants.joins(:ink_button).where('spree_ink_buttons.publish' => [true,nil], 'spree_ink_buttons.published' => [false.nil]).
-          each { |var| var.save }
-      else
-        master.save
+        variants.joins(:ink_button).where('spree_ink_buttons.publish' => [true,nil], 'spree_ink_buttons.published' => [false,nil]).
+          readonly(false).each { |var| var.save }
       end
     elsif !ink_button_publish && ink_negotiable?
       if variants.any?
-        variants.joins(:ink_button).where('spree_ink_buttons.published' => true).each do |var|
+        variants.joins(:ink_button).where('spree_ink_buttons.published' => true).readonly(false).each do |var|
           var.save
         end
       else

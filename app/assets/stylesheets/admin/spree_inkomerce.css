@@ -1,3 +1,7 @@
 /*
  *= require admin/spree_backend
 */
+
+.admin #listing_products img.inkit_logo {
+    height: 1.2em;
+}

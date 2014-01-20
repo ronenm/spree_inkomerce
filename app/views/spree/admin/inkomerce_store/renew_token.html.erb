@@ -1,0 +1,23 @@
+<%= render :partial => 'spree/admin/shared/configuration_menu' %>
+
+<% content_for :page_title do %>
+  <%= Spree.t(:renew_inkomerce_store_token) %>
+<% end %>
+   
+<%= render :partial => 'spree/shared/error_messages', :locals => { :target => @inkomerce_store } %>
+
+<%= form_for @inkomerce_store, url: admin_inkomerce_store_replace_token_path, method: :put do |f| %>
+  <fieldset class="no-border-top">
+    <%= f.field_container :api_client_id do %>
+      <%= f.label :api_client_id %><span class="required">*</span>
+      <%= f.text_field :api_client_id, class: "fullwidth" %>
+      <%= f.error_message_on :api_client_id %>
+    <% end %>
+    <%= f.field_container :api_client_secret do %>
+      <%= f.label :api_client_secret %><span class="required">*</span>
+      <%= f.text_field :api_client_secret, class: "fullwidth" %>
+      <%= f.error_message_on :api_client_secret %>
+    <% end %>
+  </fieldset>
+  <div class="form-buttons filter-actions actions" data-hook="buttons"><%= button Spree.t('actions.update'), 'icon-refresh' %></div>
+<% end %>

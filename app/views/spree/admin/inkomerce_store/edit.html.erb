@@ -1,0 +1,21 @@
+<%= render :partial => 'spree/admin/shared/configuration_menu' %>
+
+<% content_for :page_title do %>
+  <%= Spree.t(:inkomerce_store_settings) %>
+<% end %>
+
+<%  if @inkomerce_store.persisted?
+      content_for :page_actions do %>
+        <li>
+          <%= link_to Spree.t('admin.inkomerce_store.renew_token'), admin_inkomerce_store_renew_token_path,
+                       class: 'button', title: "Use if you think that store secret token values has been compromised" %>
+        </li>
+<%    end
+    end %>
+    
+<%= render :partial => 'spree/shared/error_messages', :locals => { :target => @inkomerce_store } %>
+
+<%= form_for @inkomerce_store, url: admin_inkomerce_store_path, method: :put do |f| %>
+  <%= render :partial => 'form', :locals => { f: f, store: @inkomerce_store } %>
+  <div class="form-buttons filter-actions actions" data-hook="buttons"><%= button Spree.t('actions.update'), 'icon-refresh' %></div>
+<% end %>

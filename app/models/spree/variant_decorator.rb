@@ -16,7 +16,7 @@ Spree::Variant.class_eval do
   end
   
   def ink_button_allow_publish?
-    ink_button_publish && (product.nil? || product.master.nil? || product.ink_button_publish)
+    (ink_button.publish.nil? || ink_button.publish) && (is_master? || product.nil? || product.master.nil? || product.ink_button_publish)
   end
   
   private
@@ -27,16 +27,16 @@ Spree::Variant.class_eval do
 
   def update_ink_button
     if ink_button_allow_publish?
-      if ink_button.updated_at < self.product.updated_at
+      if !ink_button.published? || ink_button.updated_at < product.updated_at
         store = Spree::InkomerceStore.new
         if store
           store.create_product(self, true)
-          ink_button.save
         end
       end
     else
-      self.ink_button_published = false
+      ink_button.published = false  
     end
+    ink_button.save
   end
 
   def check_ink_button_values

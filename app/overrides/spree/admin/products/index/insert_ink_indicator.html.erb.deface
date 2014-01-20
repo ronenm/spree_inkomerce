@@ -1,0 +1,7 @@
+<!-- insert_after "tr[data-hook='admin_products_index_rows'] erb[loud]:contains('edit_admin_product_path')"
+     enabled
+     -->
+     
+<% if product.ink_negotiable? %>
+  <%= image_tag(Spree::Config.inkit_button_logo_url,class: "inkit_logo", title: Spree.t(:admin_negotiable)) %>
+<% end %>
