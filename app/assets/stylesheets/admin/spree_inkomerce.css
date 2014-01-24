@@ -2,6 +2,14 @@
  *= require admin/spree_backend
 */
 
-.admin #listing_products img.inkit_logo {
+.admin #listing_products img.inkit_logo, .admin [data-hook="variants_row"] img.inkit_logo {
     height: 1.2em;
+}
+
+#product_ink_button_publish_field input[type="checkbox"], #variant_ink_button_publish_field input[type="checkbox"] {
+    width: initial;
+}
+
+#product_ink_button_publish_field label, #variant_ink_button_publish_field label {
+    display: inline-block;
 }

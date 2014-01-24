@@ -1,9 +1,10 @@
 Spree::Variant.class_eval do
   has_one :ink_button, class_name: 'Spree::InkButton', dependent: :destroy, inverse_of: :variant
   
-  delegate :minimum_price_in, :minimum_price, :set_minimum_price, :minimum_price=, to: :ink_button, allow_nil: true
+  delegate :minimum_price_in, :minimum_price, :set_minimum_price, :minimum_price=, :used_minimum_price, :used_minimum_price_in,
+    to: :ink_button, allow_nil: true
 
-  delegate :url, :uid, :published, :publish, :url=, :uid=, :published=, :publish=, to: :ink_button, prefix: true
+  delegate :url, :uid, :published, :published?, :publish, :url=, :uid=, :published=, :publish=, to: :ink_button, prefix: true
 
   after_initialize :ensure_ink_button
 
@@ -26,17 +27,20 @@ Spree::Variant.class_eval do
   end
 
   def update_ink_button
+    
     if ink_button_allow_publish?
       if !ink_button.published? || ink_button.updated_at < product.updated_at
         store = Spree::InkomerceStore.new
         if store
+          ink_button.save if ink_button.changed?
+          self.reload
           store.create_product(self, true)
         end
       end
     else
       ink_button.published = false  
     end
-    ink_button.save
+    ink_button.save if ink_button.changed?
   end
 
   def check_ink_button_values

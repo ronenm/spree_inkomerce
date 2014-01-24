@@ -16,12 +16,24 @@ module Spree
     # Developer can change that if required
     def minimum_price_in(currency)
       orig_price = variant.amount_in(currency)
-      return nil if maximum_discount.nil? # The caller will use the default maximum_discount
-      orig_price*(1.0-maximum_discount)
+      return nil if orig_price.nil? || maximum_discount.nil? # The caller will use the default maximum_discount
+      Spree::Money.new(orig_price*(1.0-maximum_discount),currency: currency).money.to_s
     end
   
     def minimum_price
       minimum_price_in(Spree::Config.currency)
+    end
+  
+    def used_minimum_price_in(currency)
+      orig_price = variant.amount_in(currency)
+      return nil if orig_price.nil?
+      max_disc = maximum_discount.nil? ? Spree::Config.can_default_maximum_discount.to_i/100.0 : maximum_discount
+      return nil if max_disc.nil? # The caller will use the default maximum_discount
+      Spree::Money.new(orig_price*(1.0-max_disc),currency: currency).to_s
+    end
+  
+    def used_minimum_price
+      used_minimum_price_in(Spree::Config.currency)
     end
   
     def set_minimum_price(price,currency)

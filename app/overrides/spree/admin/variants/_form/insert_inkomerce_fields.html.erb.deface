@@ -1,0 +1,26 @@
+<!-- insert_after ".field[data-hook='price']"
+     enabled
+     -->
+
+     <%= f.field_container :ink_button_publish do %>
+          <%= f.check_box :ink_button_publish %>
+          <%= f.label :ink_button_publish %>
+          <%= f.error_message_on :ink_button_publish %>
+    <% end %>
+
+     <div class="alpha three columns ink-button-show-hide">
+          <%= f.field_container :minimum_price do %>
+               <%= f.label :minimum_price, Spree.t(:minimum_price) %>
+               <%= f.text_field :minimum_price, :value => @variant.minimum_price %>
+               <%= f.error_message_on :cost_price %>
+        <% end %>
+     </div>
+     <div class="omega three columns ink-button-show-hide">
+       <%= f.field_container :used_minimum_price do %>
+               <%= f.label :used_minimum_price, Spree.t(:used_minimum_price) %>
+               <%= f.text_field :used_minimum_price, :value => @variant.used_minimum_price, disabled: true %>
+               <%= f.error_message_on :used_minimum_price %>
+        <% end %>
+     </div>
+  
+   <div class="clear"></div>
