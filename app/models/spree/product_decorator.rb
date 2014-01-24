@@ -29,6 +29,7 @@ Spree::Product.class_eval do
     if variants.any?
       Spree::InkButton.where(variant_id: variants.pluck(:id)).update_all(published: false)
     else
+      master.ensure_ink_button
       master.ink_button.update(published: false)
     end
   end

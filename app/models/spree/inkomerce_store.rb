@@ -38,8 +38,13 @@ module Spree
       uid
     end
     
-    def persisted?
+    def self.exists?
+      uid = Spree::Config.inkomerce_store_uid
       !(uid.nil? || uid=="")
+    end
+    
+    def persisted?
+      self.class.exists?
     end
     
     def default_category
