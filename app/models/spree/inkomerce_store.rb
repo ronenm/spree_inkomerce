@@ -240,7 +240,7 @@ module Spree
       price = prod_or_var.price_in(self.currency)
       return false if price.nil?
       offer = price.amount
-      min_price = prod_or_var.try(:minimum_price_in,self.currency) || offer*(1.0-self.default_maximum_discount.to_i/100.0)
+      min_price = prod_or_var.try(:used_minimum_price_in,self.currency) || offer*(1.0-self.default_maximum_discount.to_i/100.0)
       
       ink_prod_rec = {
         rid: prod_or_var.id.to_s,

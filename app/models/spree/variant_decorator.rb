@@ -11,6 +11,14 @@ Spree::Variant.class_eval do
   after_save :update_ink_button
   
   validate :check_ink_button_values
+
+  scope :ink_publish, joins(:ink_button).where('spree_ink_buttons.publish' => true)
+  
+  scope :ink_published, joins(:ink_button).where('spree_ink_buttons.published' => true)
+  
+  scope :ink_publish_descrepency, joins(:ink_button).where('NOT (spree_ink_buttons.publish = spree_ink_buttons.published)')
+  
+  attr_accessor :update_ink_buttons_required
   
   def ink_name
     option_values.exists? ? "#{name} (#{options_text})" : name
@@ -24,11 +32,9 @@ Spree::Variant.class_eval do
     self.ink_button = Spree::InkButton.new(published: false) unless ink_button
   end
 
-  private
-  
   def update_ink_button
     if ink_button_allow_publish?
-      if !ink_button.published? || ink_button.updated_at < product.updated_at
+      if !ink_button.published? || update_ink_buttons_required
         store = Spree::InkomerceStore.new
         if store
           ink_button.save if ink_button.changed?
@@ -42,17 +48,15 @@ Spree::Variant.class_eval do
     ink_button.save if ink_button.changed?
   end
 
+  private
+ 
   def check_ink_button_values
     if ink_button.publish.nil?
       # This marks a new variant
       if is_master
         ink_button.publish = false
       else
-        if product && product.master
-          master = product.master
-          ink_button.maximum_discount = master.ink_button.maximum_discount if ink_button.maximum_discount.nil?
-          ink_button.publish = true
-        end
+        ink_button.publish = true if product && product.master
       end
     end
   end

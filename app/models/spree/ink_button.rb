@@ -24,10 +24,15 @@ module Spree
       minimum_price_in(Spree::Config.currency)
     end
   
+    # This is the claculation that is used to determine the minimum price when sending to InKomerce!
     def used_minimum_price_in(currency)
       orig_price = variant.amount_in(currency)
       return nil if orig_price.nil?
-      max_disc = maximum_discount.nil? ? Spree::Config.can_default_maximum_discount.to_i/100.0 : maximum_discount
+      max_disc = maximum_discount
+      # If there is no maximum_discount on the variant take it from the master variant
+      max_disc = variant.product.master.ink_button.maximum_discount if max_disc.nil? && !variant.is_master && variant.product.master
+      # If there is no maximum_discount on the variant and nor on the master we will take it from the global setting
+      max_disc = Spree::Config.can_default_maximum_discount.to_i/100.0 if max_disc.nil?
       return nil if max_disc.nil? # The caller will use the default maximum_discount
       Spree::Money.new(orig_price*(1.0-max_disc),currency: currency).to_s
     end

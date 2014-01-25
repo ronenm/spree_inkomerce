@@ -6,12 +6,14 @@ Spree::Product.class_eval do
 
   after_save :ink_button_synchronize
 
-  after_validation :ink_button_unmark_published, if: :ink_fields_changed?
+  after_validation :ink_button_mark_for_update, if: :ink_fields_changed?
+
+  attr_accessor :update_ink_buttons_required
 
   def ink_negotiable?
-    if variants.any?
-      all_counter = variants.size
-      neg_counter = variants.joins(:ink_button).where('spree_ink_buttons.published' => true).count
+    if has_variants?
+      all_counter = variants.count
+      neg_counter = variants.ink_publish.where('spree_ink_buttons.published' => true).count
     else
       all_counter = 1
       neg_counter = ink_button_published ? 1 : 0
@@ -22,34 +24,24 @@ Spree::Product.class_eval do
   private
 
   def ink_fields_changed?
-    name_changed? || description_changed?
+    name_changed? || description_changed? || master.ink_button.changed?
   end
   
-  def ink_button_unmark_published
-    if variants.any?
-      Spree::InkButton.where(variant_id: variants.pluck(:id)).update_all(published: false)
-    else
-      master.ensure_ink_button
-      master.ink_button.update(published: false)
-    end
+  def ink_button_mark_for_update
+    self.update_ink_buttons_required = true
   end
   
   def ink_button_synchronize
     master.ink_button.save if master.ink_button.changed?
-    if ink_button_publish && ink_negotiable?!=:all
-      if variants.any?
-        variants.joins(:ink_button).where('spree_ink_buttons.publish' => [true,nil], 'spree_ink_buttons.published' => [false,nil]).
-          readonly(false).each { |var| var.save }
-      else
-        master.save
-      end
-    elsif !ink_button_publish && ink_negotiable?
-      if variants.any?
-        variants.joins(:ink_button).where('spree_ink_buttons.published' => true).readonly(false).each do |var|
+    if update_ink_buttons_required
+      if has_variants?
+        variants.each do |var|
+          var.update_ink_buttons_required = true
           var.save
         end
       else
-        master.save
+        master.update_ink_buttons_required = true
+        master.save 
       end
     end
   end
