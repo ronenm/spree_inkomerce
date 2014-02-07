@@ -5,7 +5,7 @@ module Spree
     include ActiveModel::Model
     
     attr_accessor :name, :default_category_id, :store_url, :success_uri, :cancel_uri, :currency,
-                  :locale, :default_maximum_discount, :button_logo_url, :api_client_id, :api_client_secret
+                  :locale, :default_maximum_discount, :button_logo_url, :api_client_id, :api_client_secret, :logo_uri
     
     SYNC_ATTRIBUTES = [:name, :store_url, :success_uri, :cancel_uri, :currency, :locale]
 
@@ -16,7 +16,8 @@ module Spree
       cancel_uri: 'ink/cancel',
       name: :site_name,
       button_logo_url: "https://s3.amazonaws.com/inkomerce-assets/sellers-assets/ink_can_light_with_bg.png",
-      locale: 'en'
+      locale: 'en',
+      logo_uri: -> { 'assets/' + Spree::Config.logo }
     }
 
     
@@ -117,7 +118,7 @@ module Spree
       sync if persisted?
       get_default_attribute_setting.each do |key,val|
         unless send(key)
-          send("#{key}=",val.is_a?(Symbol) ? Spree::Config.get_preference(val) : val)
+          send("#{key}=",val.is_a?(Symbol) ? Spree::Config.get_preference(val) : val.is_a?(Proc) ? val.call : val)
         end
       end
       if s_url = self.store_url
@@ -145,6 +146,7 @@ module Spree
         store = self.class.get_store
         changed_attrs = SYNC_ATTRIBUTES.select { |attr| send(attr) != store[attr] }
         changed_attrs << :default_category_id if default_category_id!=store[:default_category][:id]
+        changed_attrs << :logo_uri unless logo_uri.nil? || logo_uri =~ /^\s*$/
         return changed_attrs
       else
         # All attributes have changed ;-)
