@@ -22,8 +22,8 @@ module Spree
       end
       
       # Create order if necessary and add variant and deal
-      populator = Spree::OrderPopulator.new(current_order(true), current_currency)
-      if populator.populate(variants: { button.variant_id => 1 })
+      populator = Spree::OrderPopulator.new(current_order(create_order_if_necessary: true), current_currency)
+      if populator.populate(button.variant_id, 1)
         deal.apply(current_order)
         current_order.ensure_updated_shipments
 

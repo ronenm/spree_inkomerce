@@ -1,4 +1,4 @@
-//= require admin/spree_backend
+//= require spree/backend
 
 function inkomerce_show_hide_settings() {
     var $checkbox_field = $(this);

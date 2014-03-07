@@ -5,13 +5,13 @@ module SpreeInkomerce
       class_option :auto_run_migrations, :type => :boolean, :default => false
 
       def add_javascripts
-        append_file 'app/assets/javascripts/frontend/all.js', "//= require spree/spree_inkomerce/frontend\n"
-        append_file 'app/assets/javascripts/backend/all.js', "//= require spree/spree_inkomerce/backend\n"
+        append_file 'app/assets/javascripts/spree/frontend/all.js', "//= require spree/spree_inkomerce/frontend\n"
+        append_file 'app/assets/javascripts/spree/backend/all.js', "//= require spree/spree_inkomerce/backend\n"
       end
 
       def add_stylesheets
-        inject_into_file 'app/assets/stylesheets/frontend/all.css', " *= require spree/spree_inkomerce/frontend\n", :before => /\*\//, :verbose => true
-        inject_into_file 'app/assets/stylesheets/backend/all.css', " *= require spree/spree_inkomerce/backend\n", :before => /\*\//, :verbose => true
+        inject_into_file 'app/assets/stylesheets/spree/frontend/all.css', " *= require spree/spree_inkomerce/frontend\n", :before => /\*\//, :verbose => true
+        inject_into_file 'app/assets/stylesheets/spree/backend/all.css', " *= require spree/spree_inkomerce/backend\n", :before => /\*\//, :verbose => true
       end
 
       def add_migrations

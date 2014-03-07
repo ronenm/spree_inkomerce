@@ -1,5 +1,5 @@
 /*
- *= require store/spree_frontend
+ *= require spree/frontend
 */
 
 li[data-hook='products_list_item'] img.inkit_logo {
