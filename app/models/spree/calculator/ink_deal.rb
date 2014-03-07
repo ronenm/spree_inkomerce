@@ -8,10 +8,10 @@ module Spree
         Spree.t(:ink_deal_calculator)
       end
 
-      def compute(order, ink_deal)
-        quantity = order.line_items.where(variant_id: ink_deal.ink_button.variant_id).sum(:quantity)
-        tot_disc = ink_deal.discount * quantity
-        tot_disc > order.item_total ? -order.item_total : -tot_disc
+      def compute(line_item, ink_deal)
+        tot_disc = ink_deal.discount * line_item.quantity
+        item_total = line_item.amount
+        tot_disc > item_total ? -item_total : -tot_disc
       end
 
     end

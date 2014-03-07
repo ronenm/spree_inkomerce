@@ -10,7 +10,7 @@ module Spree
     
     include Spree::Core::CalculatedAdjustments
     
-    has_many :adjustments, as: :originator
+    has_many :adjustments, as: :source
     
     before_validation :populae_ink_deal_data
     before_destroy :deals_with_adjustments
@@ -18,32 +18,26 @@ module Spree
     def eligible?(originator)
       active?
     end
-    
-    # Calculate the amount to be used when creating an adjustment
-    def compute_amount(calculable)
-      self.calculator.compute(calculable, self)
-    end
-    
+        
     def apply(order)
-      return false unless active
-      return true if order.adjustments.where(originator_type: self.class.to_s, originator_id: self.id).exists?
-      if order.line_items.where(variant_id: ink_button.variant_id).exists?
-        return self.create_adjustment(order)
-      else
-        return false
+      return 0 unless active
+      counter = 0
+      order.line_items.where(variant_id: ink_deal.ink_button.variant_id).each do |line_item|
+        if line_item.adjustments.where(source_type: self.class.to_s, source_id: self.id).exists?
+          counter += 1
+        else
+          counter += 1 if self.create_adjustment(order,line_item)
+        end
       end
     end
   
-    def create_adjustment(order)
-      order.update_totals
-      amount = self.compute_amount(order)
-      return false if amount == 0
+    def create_adjustment(order,line_item)
+      amount = self.compute_amount(line_item)
       self.adjustments.create!(
         amount: amount,
-        adjustable: order,
-        source: order,
+        adjustable: line_item,
         order: order,
-        label: "#{Spree.t(:ink_deal)} (#{uid}) - #{ink_button.variant.ink_name}",
+        label: "#{Spree.t(:ink_deal)} - #{ink_button.variant.ink_name}",
       )
       true
     end

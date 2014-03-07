@@ -1,5 +1,5 @@
 /*
- *= require admin/spree_backend
+ *= require spree/backend
 */
 
 .admin #listing_products img.inkit_logo, .admin [data-hook="variants_row"] img.inkit_logo {
