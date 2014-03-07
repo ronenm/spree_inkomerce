@@ -2,7 +2,7 @@
 Gem::Specification.new do |s|
   s.platform    = Gem::Platform::RUBY
   s.name        = 'spree_inkomerce'
-  s.version     = '0.3.0'
+  s.version     = '2.2.0'
   s.summary     = 'InKomerce Computer Assisted Negotiation integration with Spree'
   s.description = 'InKomerce CAN (Computer assisted Negotiation) allows stores customers to negotiate for a price. This extenssion allows full integration of InKomerce CAN for Spree stores.'
   s.required_ruby_version = '>= 1.9.3'
