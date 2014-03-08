@@ -26,7 +26,7 @@ module Spree
       if populator.populate(button.variant_id, 1)
         deal.apply(current_order)
         current_order.ensure_updated_shipments
-
+        current_order.update!
         respond_with(@order) do |format|
           format.html { redirect_to cart_path }
         end
