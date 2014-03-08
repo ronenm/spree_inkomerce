@@ -10,6 +10,10 @@ Spree::Product.class_eval do
 
   attr_accessor :update_ink_buttons_required
 
+  # This is used to claculate whther a product is negotiable (in which case we may
+  # add an indifcator in the products list of its availability for negotiation)
+  # It either return false (no negotiation at all), all (all varianets are negotiable)
+  # or :some (some of the variants are negotiable)
   def ink_negotiable?
     if has_variants?
       all_counter = variants.count
@@ -21,7 +25,6 @@ Spree::Product.class_eval do
     neg_counter>0 and (neg_counter>=all_counter) ? :all : :some
   end
   
-  private
 
   def ink_fields_changed?
     name_changed? || description_changed? || master.ink_button.changed?
@@ -31,6 +34,8 @@ Spree::Product.class_eval do
     self.update_ink_buttons_required = true
   end
   
+  private
+
   def ink_button_synchronize
     master.ink_button.save if master.ink_button.changed?
     if update_ink_buttons_required

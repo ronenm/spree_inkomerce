@@ -18,8 +18,10 @@ Spree::Variant.class_eval do
   
   scope :ink_publish_descrepency, joins(:ink_button).where('NOT (spree_ink_buttons.publish = spree_ink_buttons.published)')
   
+  # This will force update of the ink_button (usually set from the product model)
   attr_accessor :update_ink_buttons_required
   
+  # This is the name of the variant/master as it will be shown in the negotiation page title
   def ink_name
     option_values.exists? ? "#{name} (#{options_text})" : name
   end
@@ -29,18 +31,21 @@ Spree::Variant.class_eval do
   end
 
   def ensure_ink_button
+    # This is a workaround for an issue in the db:migrate where there is a migration before the
+    # ink_button is defined
     begin
       self.ink_button = Spree::InkButton.new(published: false) unless ink_button
     rescue
-      puts "ink_button not defined!"
+      puts "ink_button not defined yet!"
     end
   end
 
   def update_ink_button
     if ink_button_allow_publish?
-      if !ink_button.published? || update_ink_buttons_required
+      if !ink_button.published? || update_ink_buttons_required || default_price_changed?
         store = Spree::InkomerceStore.new
         if store
+          save_default_price
           ink_button.save if ink_button.changed?
           self.reload
           store.create_product(self, true)
@@ -50,6 +55,10 @@ Spree::Variant.class_eval do
       ink_button.published = false  
     end
     ink_button.save if ink_button.changed?
+  end
+
+  def default_price_changed?
+    default_price && (default_price.changed? || default_price.new_record?)
   end
 
   private

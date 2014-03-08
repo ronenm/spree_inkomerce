@@ -269,6 +269,37 @@ module Spree
       end
     end
     
+    # Update a variant prices
+    def update_prices(variant)
+      # Now we are in variants space
+      price = variant.price_in(self.currency)
+      return false if price.nil?
+      offer = price.amount
+      min_price = variant.try(:used_minimum_price_in,self.currency) || offer*(1.0-self.default_maximum_discount.to_i/100.0)
+      
+      ink_prod_rec = {
+        offer: offer.to_s,
+        minimum_price: min_price.to_s,
+      }
+      puts "*** #{ink_prod_rec} ****\n"
+      ret_rec = self.class.store_connector.update_product(variant.id.to_s,ink_prod_rec)
+      puts "*** => #{ret_rec} ***\n"
+      if ret_rec.key?(:store_product)
+        variant.try(:ink_button_uid=,ret_rec[:store_product][:button_uid])
+        variant.try(:ink_button_url=,ret_rec[:store_product][:button_url])
+        variant.try(:ink_button_published=,true)
+        return true
+      else
+        self.errors.add(:general,ret_rec.is_a?(Hash) && ret_rec[:error] || "Unable to publish product to InKomerce")
+        return false
+      end
+    end   
+    
+    def update_product_image(variant,image)
+      # Uploading of images is done asynchronisly so there is no need to check result
+      self.class.store_connector.upload_url_product_image(variant.id.to_s, url: image.attachment.url(:original))
+    end
+    
     def populate_deal_data(deal_model)
       buid = deal_model.buid
       nuid = deal_model.nuid
