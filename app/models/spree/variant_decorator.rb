@@ -29,7 +29,11 @@ Spree::Variant.class_eval do
   end
 
   def ensure_ink_button
-    self.ink_button = Spree::InkButton.new(published: false) unless ink_button
+    begin
+      self.ink_button = Spree::InkButton.new(published: false) unless ink_button
+    rescue
+      puts "ink_button not defined!"
+    end
   end
 
   def update_ink_button
