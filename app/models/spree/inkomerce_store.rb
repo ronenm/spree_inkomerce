@@ -84,6 +84,11 @@ module Spree
       Spree::Config.inkomerce_store_token = self.store_connector.token
     end
     
+    def self.remove_store
+      Spree::Config.inkomerce_store_uid = nil
+      Spree::Config.inkomerce_store_token = nil
+    end
+    
     def self.connect
       self.store_connector = connector = InKomerceAPIV1::Store.connect(Spree::Config.inkomerce_store_uid,
                                                            Spree::Config.inkomerce_store_token,
@@ -222,7 +227,25 @@ module Spree
     end
     
     def remove_taxon(taxon)
-      # This is not supported by API, just ignore
+      # This is not supported by API for now, just ignore
+    end
+    
+    def update_all_products
+      Spree::Product.all.each do |prod|
+        if prod.variants.empty?
+          puts "Single...\n"
+          if prod.master.ink_button_publish
+            create_product(prod.master,true)
+            prod.master.ink_button.save
+          end
+        else
+          puts "With options...\n"
+          prod.variants.ink_publish.each do |var|
+            create_product(var,true)
+            var.ink_button.save
+          end
+        end
+      end
     end
     
     # Create/Update a product (and its variants) or a single variant
