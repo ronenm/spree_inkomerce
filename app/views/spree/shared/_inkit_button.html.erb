@@ -3,12 +3,12 @@
     product.variants.each do |variant|
       ink_button = variant.ink_button
       if ink_button.published && ink_button.publish %>
-        <div>
-          <li class='vtmb tmb-<%= variant.id %>'>
-            <h6><%= Spree.t(:ink_negotiate_now) %></h6>
-            <%= link_to(image_tag(Spree::Config.inkit_button_logo_url,class: "inkit_logo", title: Spree.t(:inkit_negotiable)),ink_button.url + '?subsite=mini') %>
-          </li>
-        </div><%
+        <li class='vtmb tmb-<%= variant.id %>'>
+          <%= link_to(ink_button.url + '?subsite=mini', class: 'button large primary') do %>
+            <%= image_tag(Spree::Config.inkit_button_logo_url,class: "inkit_logo") %>
+            <%= Spree.t(:inkit_make_an_offer) %>
+          <% end %>
+        </li><%
       end
     end
   else
@@ -16,10 +16,10 @@
     ink_button = variant.ink_button
     if ink_button.published && ink_button.publish %>
       <li>
-        <div>
-          <h6><%= Spree.t(:ink_negotiate_now) %></h6>
-          <%= link_to(image_tag(Spree::Config.inkit_button_logo_url,class: "inkit_logo", title: Spree.t(:inkit_negotiable)),ink_button.url  + '?subsite=mini') %>
-        </div>
+        <%= link_to(ink_button.url + '?subsite=mini', class: 'button large primary') do %>
+          <%= image_tag(Spree::Config.inkit_button_logo_url,class: "inkit_logo") %>
+          <%= Spree.t(:inkit_make_an_offer) %>
+        <% end %>
       </li><%
     end
   end %>

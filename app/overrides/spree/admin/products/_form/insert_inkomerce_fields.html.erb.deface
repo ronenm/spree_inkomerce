@@ -1,4 +1,4 @@
-<!-- insert_before "[data-hook='admin_product_form_right'] div.alpha:first-child"
+<!-- insert_after "[data-hook='admin_product_form_price']"
      enabled
      -->
 

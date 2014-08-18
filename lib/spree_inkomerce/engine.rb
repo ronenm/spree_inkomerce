@@ -17,7 +17,8 @@ module SpreeInkomerce
         preference :inkomerce_store_token,        :string
         preference :inkomerce_site_type,           :string, :default => 'production'
         preference :can_default_maximum_discount, :integer
-        preference :inkit_button_logo_url,        :string, :default => "https://s3.amazonaws.com/inkomerce-assets/sellers-assets/ink_can_light_with_bg.png"
+        #preference :inkit_button_logo_url,        :string, :default => "https://s3.amazonaws.com/inkomerce-assets/sellers-assets/ink_can_light_with_bg.png"
+        preference :inkit_button_logo_url,        :string, :default => "https://s3.amazonaws.com/inkomerce-assets/sellers-assets/oj_icon_white.png"
       end
     end
 

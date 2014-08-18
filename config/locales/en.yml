@@ -3,7 +3,8 @@
 
 en:
   spree:
-    ink_deal: "InKomerce deal"
-    inkit_negotiable: "The price of this product is negotiable!!!\nNegotiate your price in real time!!!\nPowered InKomerce."
+    ink_deal: "Your deal"
+    inkit_negotiable: "or Make an Offer"
     ink_negotiate_now: "NEGOTIATE A BETTER PRICE. Click on the 'InK It' button!"
     admin_negotiable: "This product or some of its variants are available for negotiation."
+    inkit_make_an_offer: "Make an Offer!"
