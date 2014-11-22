@@ -4,6 +4,31 @@ module Spree
     rescue_from ActiveRecord::RecordNotFound, :with => :render_404
     helper 'spree/products', 'spree/orders'
     
+    def negotiate
+      if params[:buid].nil?
+        redirect_to unauthorized_path
+        return
+      end
+      
+      button = Spree::InkButton.find_by!(uid: params[:buid])
+      
+      partner = Spree::InkomercePartner.new
+      
+      user_affinity_token = session[:inkomerce_user_affinity_token]
+      if user_affinity_token.nil?
+        user_affinity_token = partner.create_affinity
+        user_affinity_token = user_affinity_token[:user_affinity][:token]
+        redirect_to unauthorized_path if user_affinity_token.nil?
+        session[:inkomerce_user_affinity_token] = user_affinity_token
+      end
+      
+      session_token_rec = partner.get_affinity_session(user_affinity_token)
+      
+      url = partner.ui_url('negotiations/new',buid: button.uid, session_token: session_token_rec[:session][:token])
+      puts "PATH = #{url}\n"
+      redirect_to url
+    end
+    
     def success
       if params[:buid].nil? || params[:nuid].nil?
         redirect_to unauthorized_path

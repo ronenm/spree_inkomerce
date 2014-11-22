@@ -4,7 +4,8 @@
       ink_button = variant.ink_button
       if ink_button.published && ink_button.publish %>
         <li class='vtmb tmb-<%= variant.id %>'>
-          <%= link_to(ink_button.url + '?subsite=mini', class: 'button large primary') do %>
+          <%# ink_button.url + '?subsite=mini' %>
+          <%= link_to(ink_negotiate_path(buid: ink_button.uid), class: 'button large primary') do %>
             <%= image_tag(Spree::Config.inkit_button_logo_url,class: "inkit_logo") %>
             <%= Spree.t(:inkit_make_an_offer) %>
           <% end %>
@@ -16,7 +17,8 @@
     ink_button = variant.ink_button
     if ink_button.published && ink_button.publish %>
       <li>
-        <%= link_to(ink_button.url + '?subsite=mini', class: 'button large primary') do %>
+        <%# ink_button.url + '?subsite=mini' %>
+        <%= link_to(ink_negotiate_path(buid: ink_button.uid), class: 'button large primary') do %>
           <%= image_tag(Spree::Config.inkit_button_logo_url,class: "inkit_logo") %>
           <%= Spree.t(:inkit_make_an_offer) %>
         <% end %>
